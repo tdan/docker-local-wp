@@ -1,0 +1,54 @@
+version: '2'
+
+services:
+  # Database
+  db:
+    image: mariadb
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "18766:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wp_dev_site
+      MYSQL_USER: wp_dev
+      MYSQL_PASSWORD: wpdevdb_password 
+    restart: unless-stopped
+    networks:
+      - net
+  # Wordpress
+  site:
+    depends_on:
+      - db
+    image: wordpress
+    volumes:
+      - ./www:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    ports:
+      - "18765:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wp_dev_site
+      WORDPRESS_DB_USER: wp_dev
+      WORDPRESS_DB_PASSWORD: wpdevdb_password
+      WORDPRESS_DEBUG: true
+      WORDPRESS_DEBUG_LOG: true
+      WORDPRESS_DEBUG_DISPLAY: false
+    restart: unless-stopped
+    networks:
+      - net
+  # PHPMyAdmin
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "18767:80"
+    environment:
+      PMA_HOST: db
+    networks:
+      - net
+    depends_on:
+      - db
+networks:
+  net:
+volumes:
+  db_data:
