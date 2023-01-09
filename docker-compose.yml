@@ -1,9 +1,10 @@
-version: '2'
+version: '3.3'
 
 services:
   # Database
   db:
     image: mariadb
+    container_name: wp_db
     volumes:
       - db_data:/var/lib/mysql
     ports:
@@ -17,10 +18,11 @@ services:
     networks:
       - net
   # Wordpress
-  site:
+  wp:
     depends_on:
       - db
     image: wordpress
+    container_name: wp_instance
     volumes:
       - ./www:/var/www/html
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
@@ -40,14 +42,33 @@ services:
   # PHPMyAdmin
   phpmyadmin:
     image: phpmyadmin
+    container_name: wp_phpmyadmin
     ports:
       - "18767:80"
     environment:
       PMA_HOST: db
+    restart: unless-stopped
     networks:
       - net
     depends_on:
       - db
+  # WP-CLI
+  wpcli:
+    image: wordpress:cli
+    links:
+      - db:db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wp_dev_site
+      WORDPRESS_DB_USER: wp_dev
+      WORDPRESS_DB_PASSWORD: wpdevdb_password
+    volumes_from:
+      - wp
+    depends_on:
+      - db
+      - wp
+    networks:
+      - net
 networks:
   net:
 volumes:
