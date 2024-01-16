@@ -1,4 +1,4 @@
-version: '3.3'
+version: "3.3"
 
 services:
   # Database
@@ -13,7 +13,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wp_dev_site
       MYSQL_USER: wp_dev
-      MYSQL_PASSWORD: wpdevdb_password 
+      MYSQL_PASSWORD: wpdevdb_password
     restart: unless-stopped
     networks:
       - net
@@ -21,11 +21,13 @@ services:
   wp:
     depends_on:
       - db
-    image: wordpress
+    image: wordpress:php8.3
     container_name: wp_instance
+    user: 0:0
     volumes:
-      - ./www:/var/www/html
+      - ./app:/var/www/html/wp-content/:rw
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./error-logging.ini:/usr/local/etc/php/conf.d/error-logging.ini
     ports:
       - "18765:80"
     environment:
@@ -33,10 +35,12 @@ services:
       WORDPRESS_DB_NAME: wp_dev_site
       WORDPRESS_DB_USER: wp_dev
       WORDPRESS_DB_PASSWORD: wpdevdb_password
-      WORDPRESS_DEBUG: true
-      WORDPRESS_DEBUG_LOG: true
-      WORDPRESS_DEBUG_DISPLAY: false
-    restart: unless-stopped
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DEBUG_LOG', true );
+        define( 'WP_DEBUG_DISPLAY', false );
+        @ini_set( 'display_errors', 0 );
+    restart: always
     networks:
       - net
   # PHPMyAdmin
@@ -54,7 +58,7 @@ services:
       - db
   # WP-CLI
   wpcli:
-    image: wordpress:cli
+    image: wordpress:cli-php8.3
     links:
       - db:db
     environment:
@@ -72,4 +76,5 @@ services:
 networks:
   net:
 volumes:
+  www_data:
   db_data:
