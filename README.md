@@ -14,8 +14,17 @@ To start a WordPress instance & services, run:
 $ docker compose up -d
 ```
 
-To access Wordpress, go to http://0.0.0.0:18765 on browser.
-To access PHPMyAdmin, visit http://0.0.0.0:18767.
+To allow host user to write on wp-content/ from host machine, run this script:
+
+```
+$ chmod +x fix_permissions_for_local_development.sh
+$ ./fix_permissions_for_local_development.sh
+```
+
+**!!! Make sure SELinux is permissive, otherwise we won't be able to write on the bind-mount folder**
+
+To access Wordpress, go to http://localhost:18765 on browser.
+To access PHPMyAdmin, visit http://localhost:18767.
 
 ### Stopping WordPress instance & services
 
