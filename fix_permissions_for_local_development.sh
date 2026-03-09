@@ -1,5 +1,7 @@
+#!/bin/sh
+
 WWW_DATA_UID=33
-RESULT=$(docker compose exec -u www-data wp id -u)
+RESULT=$(docker compose exec -u www-data wp-fpm id -u)
 COMMAND_SUCCESS=$?
 if [ $COMMAND_SUCCESS -eq 0 ]; then
   WWW_DATA_UID=$(echo $RESULT | tr -d '\r')
